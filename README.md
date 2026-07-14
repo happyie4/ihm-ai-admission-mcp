@@ -35,5 +35,5 @@ python server.py
 
 ```bash
 docker build -t ihm-mcp .
-docker run -p 8000:8000 ihm-mcp
+docker run -p 8080:8080 ihm-mcp
 ```
