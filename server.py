@@ -107,6 +107,21 @@ TOOLS: List[Dict[str, Any]] = [
             "additionalProperties": False,
         },
     },
+    {
+        "name": "generate_counselor_comment",
+        "description": "지원 적합도, 활동 근거, 면접 대비 요소를 종합해 상담자 코멘트 초안을 생성합니다.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "student_id": {"type": "integer"},
+                "university": {"type": "string"},
+                "major": {"type": "string"},
+                "admission_type": {"type": "string"},
+            },
+            "required": ["student_id", "university", "major", "admission_type"],
+            "additionalProperties": False,
+        },
+    },
 ]
 
 
@@ -172,6 +187,31 @@ def classify_fit(student_grade: float, cut_70_grade: float) -> Dict[str, str]:
     }
 
 
+def build_counselor_comment(
+    student: Dict[str, Any],
+    cutline: Dict[str, Any],
+    fit: Dict[str, str],
+    prior_learning: List[Dict[str, Any]],
+) -> str:
+    activity_summary = ", ".join(student["activities"][:2])
+    student_label = student["display_name"]
+    topic_particle = "은"
+    if student_label[-1:] in {"A", "B", "C", "D", "E"}:
+        topic_particle = "는"
+    prior_point = "면접 대비 기준은 공식 선행학습영향평가 자료 확인 후 보완합니다."
+    if prior_learning:
+        prior_point = prior_learning[0]["counseling_points"][0]
+
+    return (
+        f"상담자 코멘트: {student_label}{topic_particle} {student['target_major']} 진로 방향과 "
+        f"{activity_summary} 활동의 연결성이 확인됩니다. {cutline['university']} "
+        f"{cutline['major']} {cutline['admission_type']} 전형은 현재 더미 기준으로 "
+        f"{fit['support_level']} 검토가 가능하나, 합격 가능성을 단정하기보다 "
+        f"수능최저, 학생부 활동의 구체성, 면접 답변 완성도를 함께 점검해야 합니다. "
+        f"{prior_point}"
+    )
+
+
 def call_tool(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
     data = load_data()
 
@@ -226,6 +266,12 @@ def call_tool(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
         if prior_learning:
             points = prior_learning[0]["counseling_points"]
             prior_learning_text = "\n".join(f"- {point}" for point in points)
+        counselor_comment = build_counselor_comment(
+            student,
+            cutline,
+            fit,
+            prior_learning,
+        )
         report = f"""# AI 진로진학 상담 보고서 초안
 
 ## 학생 개요
@@ -250,6 +296,9 @@ def call_tool(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
 ## 선행학습영향평가 기반 면접 대비
 {prior_learning_text}
 
+## 상담자 코멘트
+{counselor_comment}
+
 ## 근거
 - {cutline['source']}
 - 선행학습영향평가 자료는 각 대학 공식 입학처 공개자료만 DB화하는 것을 원칙으로 합니다.
@@ -257,6 +306,23 @@ def call_tool(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
 ※ 본 보고서는 공모전 시연용 더미 데이터로 생성되었습니다.
 """
         return text_content(report)
+
+    if name == "generate_counselor_comment":
+        student = find_student(data, int(arguments["student_id"]))
+        cutline = find_cutline(
+            data,
+            arguments["university"],
+            arguments["major"],
+            arguments["admission_type"],
+        )
+        fit = classify_fit(student["converted_grade"], cutline["cut_70_grade"])
+        prior_learning = find_prior_learning(
+            data,
+            cutline["university"],
+            cutline["admission_type"],
+            2026,
+        )
+        return text_content(build_counselor_comment(student, cutline, fit, prior_learning))
 
     if name == "recommend_interview_questions":
         student = find_student(data, int(arguments["student_id"]))
