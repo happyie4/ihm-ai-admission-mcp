@@ -275,7 +275,7 @@ class MCPHandler(BaseHTTPRequestHandler):
                 "protocolVersion": "2025-03-26",
                 "capabilities": {"tools": {}},
                 "serverInfo": {
-                    "name": "ihm-ai-admission-counseling",
+                    "name": "ihm-ai-admission-mcp",
                     "version": "0.1.0",
                 },
             })
