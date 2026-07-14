@@ -164,6 +164,27 @@ TOOLS: List[Dict[str, Any]] = [
             "additionalProperties": False,
         },
     },
+    {
+        "name": "get_admission_result_trend",
+        "description": "AI 진로진학 상담 MCP에서 대학·학과·전형의 최근 3년 입시결과 추세를 조회합니다.",
+        "annotations": {
+            "title": "AI 진로진학 상담 MCP 3년 입시결과 추세 조회",
+            "readOnlyHint": True,
+            "destructiveHint": False,
+            "idempotentHint": True,
+            "openWorldHint": False,
+        },
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "university": {"type": "string"},
+                "major": {"type": "string"},
+                "admission_type": {"type": "string"},
+            },
+            "required": ["university", "major", "admission_type"],
+            "additionalProperties": False,
+        },
+    },
 ]
 
 
@@ -206,6 +227,117 @@ def find_prior_learning(
             continue
         results.append(item)
     return results
+
+
+def find_admission_trend(
+    data: Dict[str, Any],
+    university: str,
+    major: str,
+    admission_type: str,
+) -> Dict[str, Any]:
+    major_aliases = {
+        "경영학과": {"경영학과", "경영대학"},
+        "경영대학": {"경영학과", "경영대학"},
+    }
+    requested_majors = major_aliases.get(major, {major})
+
+    for trend in data.get("admission_result_trends", []):
+        trend_majors = {
+            trend.get("major", ""),
+            trend.get("source_major_name", ""),
+        }
+        if (
+            trend["university"] == university
+            and trend["admission_type"] == admission_type
+            and requested_majors.intersection(trend_majors)
+        ):
+            return trend
+    raise ValueError("해당 대학/학과/전형의 3년 입시결과 추세 데이터가 없습니다.")
+
+
+def trend_value(value: Any, suffix: str = "") -> str:
+    if value is None:
+        return "-"
+    return f"{value}{suffix}"
+
+
+def summarize_trend(trend: Dict[str, Any]) -> Dict[str, str]:
+    registered = [
+        item for item in trend.get("years", [])
+        if item.get("status") == "등록"
+    ]
+    if len(registered) < 2:
+        return {
+            "cut_70_trend": "추세 판단보류",
+            "competition_trend": "추세 판단보류",
+            "summary": "등록된 연도별 입결이 부족해 추세 판단을 보류합니다.",
+        }
+
+    first = registered[0]
+    last = registered[-1]
+
+    cut_delta = None
+    if first.get("cut_70_grade") is not None and last.get("cut_70_grade") is not None:
+        cut_delta = round(last["cut_70_grade"] - first["cut_70_grade"], 2)
+
+    comp_delta = None
+    if first.get("competition_rate") is not None and last.get("competition_rate") is not None:
+        comp_delta = round(last["competition_rate"] - first["competition_rate"], 2)
+
+    if cut_delta is None:
+        cut_text = "70%컷 추세 판단보류"
+    elif cut_delta < -0.05:
+        cut_text = f"70%컷이 {abs(cut_delta):.2f}등급 낮아져 경쟁 성적대가 높아진 흐름입니다."
+    elif cut_delta > 0.05:
+        cut_text = f"70%컷이 {cut_delta:.2f}등급 높아져 성적대가 완화된 흐름입니다."
+    else:
+        cut_text = f"70%컷 변화가 {cut_delta:+.2f}등급으로 크지 않습니다."
+
+    if comp_delta is None:
+        comp_text = "경쟁률 추세 판단보류"
+    elif comp_delta < -1.0:
+        comp_text = f"경쟁률이 {abs(comp_delta):.1f}:1 낮아졌습니다."
+    elif comp_delta > 1.0:
+        comp_text = f"경쟁률이 {comp_delta:.1f}:1 높아졌습니다."
+    else:
+        comp_text = f"경쟁률 변화가 {comp_delta:+.1f}:1로 크지 않습니다."
+
+    return {
+        "cut_70_trend": cut_text,
+        "competition_trend": comp_text,
+        "summary": f"{cut_text} {comp_text}",
+    }
+
+
+def format_trend_markdown(trend: Dict[str, Any]) -> str:
+    summary = summarize_trend(trend)
+    lines = [
+        f"## {trend['university']} {trend['major']} {trend['admission_type']} 3년 입시결과",
+        "",
+        "| 학년도 | 경쟁률 | 70%컷 | 충원율 | 상태 |",
+        "|---:|---:|---:|---:|---|",
+    ]
+    for item in trend.get("years", []):
+        lines.append(
+            "| "
+            f"{item['admission_year']} | "
+            f"{trend_value(item.get('competition_rate'), ':1')} | "
+            f"{trend_value(item.get('cut_70_grade'))} | "
+            f"{trend_value(item.get('additional_pass_rate'), '%')} | "
+            f"{item.get('status', '-')}"
+            " |"
+        )
+    lines.extend([
+        "",
+        "### 추세 요약",
+        f"- {summary['summary']}",
+        "",
+        "### 출처/주의",
+        f"- 출처: {trend.get('source', '-')}",
+        f"- 정책: {trend.get('source_policy', '-')}",
+        "- 2024 등 미등록 값은 공식자료 확인 전이므로 판단에 사용하지 않습니다.",
+    ])
+    return "\n".join(lines)
 
 
 def classify_fit(student_grade: float, cut_70_grade: float) -> Dict[str, str]:
@@ -274,6 +406,17 @@ def call_tool(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
             arguments["admission_type"],
         )
         fit = classify_fit(student["converted_grade"], cutline["cut_70_grade"])
+        trend_summary = "3년 입시결과 추세 데이터 없음"
+        try:
+            trend = find_admission_trend(
+                data,
+                arguments["university"],
+                arguments["major"],
+                arguments["admission_type"],
+            )
+            trend_summary = summarize_trend(trend)["summary"]
+        except ValueError:
+            pass
         result = {
             "student": student["display_name"],
             "university": cutline["university"],
@@ -285,6 +428,7 @@ def call_tool(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
             "support_level": fit["support_level"],
             "grade_gap": fit["grade_gap"],
             "reason": fit["reason"],
+            "three_year_trend": trend_summary,
             "source": cutline["source"],
         }
         return text_content(json.dumps(result, ensure_ascii=False, indent=2))
@@ -308,6 +452,17 @@ def call_tool(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
         if prior_learning:
             points = prior_learning[0]["counseling_points"]
             prior_learning_text = "\n".join(f"- {point}" for point in points)
+        trend_text = "등록된 3년 입시결과 추세 없음"
+        try:
+            trend = find_admission_trend(
+                data,
+                cutline["university"],
+                cutline["major"],
+                cutline["admission_type"],
+            )
+            trend_text = format_trend_markdown(trend)
+        except ValueError:
+            pass
         counselor_comment = build_counselor_comment(
             student,
             cutline,
@@ -330,6 +485,9 @@ def call_tool(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
 - 경쟁률: {cutline['competition_rate']}
 - 지원 판단: {fit['support_level']}
 - 판단 근거: {fit['reason']}
+
+## 최근 3년 입시결과 추세
+{trend_text}
 
 ## 상담 제안
 - {student['next_action']}
@@ -400,6 +558,15 @@ def call_tool(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
             lines.append("- 예시 질문")
             lines.extend(f"  {idx + 1}. {question}" for idx, question in enumerate(item["sample_questions"]))
         return text_content("\n".join(lines))
+
+    if name == "get_admission_result_trend":
+        trend = find_admission_trend(
+            data,
+            arguments["university"],
+            arguments["major"],
+            arguments["admission_type"],
+        )
+        return text_content(format_trend_markdown(trend))
 
     raise ValueError(f"지원하지 않는 도구입니다: {name}")
 

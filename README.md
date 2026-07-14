@@ -38,6 +38,10 @@ AI 진로진학 상담을 위한 MCP 서버입니다. 공모전 시연용 더미
 사례학생 A의 고려대학교 경영학과 학교추천 전형에 대한 상담자 코멘트를 작성해 주세요.
 ```
 
+```text
+고려대학교 경영학과 학교추천 전형의 최근 3년 입시결과 추세를 보여 주세요.
+```
+
 ## 개인정보 보호
 
 이 서버는 공모전 제출용 더미 데이터만 사용합니다.
@@ -58,6 +62,7 @@ GET /health
 - `recommend_interview_questions`: 전공 기반 면접 질문 추천
 - `search_prior_learning_assessment`: 공식 선행학습영향평가 기반 면접 대비 기준 조회
 - `generate_counselor_comment`: 상담자 코멘트 초안 생성
+- `get_admission_result_trend`: 최근 3년 입시결과 추세 조회
 
 ## PlayMCP 등록 점검
 

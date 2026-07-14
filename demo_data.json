@@ -24,17 +24,143 @@
       "university": "고려대학교",
       "major": "경영학과",
       "admission_type": "학교추천",
-      "cut_70_grade": 1.86,
-      "competition_rate": "8.4:1",
-      "source": "공모전 시연용 더미 입결 데이터"
+      "cut_70_grade": 1.31,
+      "competition_rate": "3.3:1",
+      "source": "고려대학교 2026 학교추천전형 입결 시연 데이터"
     },
     {
       "university": "고려대학교",
       "major": "산업경영공학부",
       "admission_type": "학교추천",
-      "cut_70_grade": 2.02,
-      "competition_rate": "7.1:1",
-      "source": "공모전 시연용 더미 입결 데이터"
+      "cut_70_grade": 1.27,
+      "competition_rate": "7.0:1",
+      "source": "고려대학교 2026 학교추천전형 입결 시연 데이터"
+    }
+  ],
+  "admission_result_trends": [
+    {
+      "university": "고려대학교",
+      "major": "경영학과",
+      "source_major_name": "경영대학",
+      "admission_type": "학교추천",
+      "source": "고려대학교 학과별 경쟁률·입시결과 시연 데이터",
+      "source_policy": "공식자료 기반 구조로 관리하되 MCP에는 개인정보 없는 시연용 입결만 포함",
+      "years": [
+        {
+          "admission_year": 2024,
+          "competition_rate": null,
+          "cut_70_grade": null,
+          "additional_pass_rate": null,
+          "status": "자료준비중"
+        },
+        {
+          "admission_year": 2025,
+          "competition_rate": 6.1,
+          "cut_70_grade": 1.36,
+          "additional_pass_rate": 148.1,
+          "status": "등록"
+        },
+        {
+          "admission_year": 2026,
+          "competition_rate": 3.3,
+          "cut_70_grade": 1.31,
+          "additional_pass_rate": 182.7,
+          "status": "등록"
+        }
+      ]
+    },
+    {
+      "university": "고려대학교",
+      "major": "산업경영공학부",
+      "source_major_name": "산업경영공학부",
+      "admission_type": "학교추천",
+      "source": "고려대학교 학과별 경쟁률·입시결과 시연 데이터",
+      "source_policy": "공식자료 기반 구조로 관리하되 MCP에는 개인정보 없는 시연용 입결만 포함",
+      "years": [
+        {
+          "admission_year": 2024,
+          "competition_rate": null,
+          "cut_70_grade": null,
+          "additional_pass_rate": null,
+          "status": "자료준비중"
+        },
+        {
+          "admission_year": 2025,
+          "competition_rate": 13.5,
+          "cut_70_grade": 1.39,
+          "additional_pass_rate": 125.0,
+          "status": "등록"
+        },
+        {
+          "admission_year": 2026,
+          "competition_rate": 7.0,
+          "cut_70_grade": 1.27,
+          "additional_pass_rate": 125.0,
+          "status": "등록"
+        }
+      ]
+    },
+    {
+      "university": "고려대학교",
+      "major": "컴퓨터학과",
+      "source_major_name": "컴퓨터학과",
+      "admission_type": "학교추천",
+      "source": "고려대학교 학과별 경쟁률·입시결과 시연 데이터",
+      "source_policy": "공식자료 기반 구조로 관리하되 MCP에는 개인정보 없는 시연용 입결만 포함",
+      "years": [
+        {
+          "admission_year": 2024,
+          "competition_rate": null,
+          "cut_70_grade": null,
+          "additional_pass_rate": null,
+          "status": "자료준비중"
+        },
+        {
+          "admission_year": 2025,
+          "competition_rate": 8.5,
+          "cut_70_grade": 1.26,
+          "additional_pass_rate": 365.0,
+          "status": "등록"
+        },
+        {
+          "admission_year": 2026,
+          "competition_rate": 4.4,
+          "cut_70_grade": 1.25,
+          "additional_pass_rate": 219.0,
+          "status": "등록"
+        }
+      ]
+    },
+    {
+      "university": "고려대학교",
+      "major": "데이터과학과",
+      "source_major_name": "데이터과학과",
+      "admission_type": "학교추천",
+      "source": "고려대학교 학과별 경쟁률·입시결과 시연 데이터",
+      "source_policy": "공식자료 기반 구조로 관리하되 MCP에는 개인정보 없는 시연용 입결만 포함",
+      "years": [
+        {
+          "admission_year": 2024,
+          "competition_rate": null,
+          "cut_70_grade": null,
+          "additional_pass_rate": null,
+          "status": "자료준비중"
+        },
+        {
+          "admission_year": 2025,
+          "competition_rate": 10.3,
+          "cut_70_grade": 1.39,
+          "additional_pass_rate": 85.7,
+          "status": "등록"
+        },
+        {
+          "admission_year": 2026,
+          "competition_rate": 6.4,
+          "cut_70_grade": 1.30,
+          "additional_pass_rate": 157.1,
+          "status": "등록"
+        }
+      ]
     }
   ],
   "prior_learning_assessments": [
