@@ -43,7 +43,14 @@ def text_content(text: str) -> Dict[str, Any]:
 TOOLS: List[Dict[str, Any]] = [
     {
         "name": "list_demo_students",
-        "description": "공모전용 더미 학생 목록을 조회합니다.",
+        "description": "AI 진로진학 상담 MCP에서 공모전용 더미 학생 목록을 조회합니다.",
+        "annotations": {
+            "title": "AI 진로진학 상담 MCP 더미 학생 목록 조회",
+            "readOnlyHint": True,
+            "destructiveHint": False,
+            "idempotentHint": True,
+            "openWorldHint": False,
+        },
         "inputSchema": {
             "type": "object",
             "properties": {},
@@ -52,7 +59,14 @@ TOOLS: List[Dict[str, Any]] = [
     },
     {
         "name": "analyze_admission_fit",
-        "description": "더미 학생의 내신과 대학 입결 70%컷을 비교해 지원 수준을 판단합니다.",
+        "description": "AI 진로진학 상담 MCP에서 더미 학생의 내신과 대학 입결 70%컷을 비교해 지원 수준을 판단합니다.",
+        "annotations": {
+            "title": "AI 진로진학 상담 MCP 지원 적합도 분석",
+            "readOnlyHint": True,
+            "destructiveHint": False,
+            "idempotentHint": True,
+            "openWorldHint": False,
+        },
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -67,7 +81,14 @@ TOOLS: List[Dict[str, Any]] = [
     },
     {
         "name": "generate_admission_report",
-        "description": "더미 학생 기준의 진로진학 상담 보고서 초안을 생성합니다.",
+        "description": "AI 진로진학 상담 MCP에서 더미 학생 기준의 진로진학 상담 보고서 초안을 생성합니다.",
+        "annotations": {
+            "title": "AI 진로진학 상담 MCP 상담 보고서 초안 생성",
+            "readOnlyHint": True,
+            "destructiveHint": False,
+            "idempotentHint": True,
+            "openWorldHint": False,
+        },
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -82,7 +103,14 @@ TOOLS: List[Dict[str, Any]] = [
     },
     {
         "name": "recommend_interview_questions",
-        "description": "희망 전공과 학생 활동을 바탕으로 면접 예상 질문을 추천합니다.",
+        "description": "AI 진로진학 상담 MCP에서 희망 전공과 학생 활동을 바탕으로 면접 예상 질문을 추천합니다.",
+        "annotations": {
+            "title": "AI 진로진학 상담 MCP 면접 예상 질문 추천",
+            "readOnlyHint": True,
+            "destructiveHint": False,
+            "idempotentHint": True,
+            "openWorldHint": False,
+        },
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -95,7 +123,14 @@ TOOLS: List[Dict[str, Any]] = [
     },
     {
         "name": "search_prior_learning_assessment",
-        "description": "공식 입학처 선행학습영향평가 기준을 반영한 면접·구술 대비 포인트를 조회합니다.",
+        "description": "AI 진로진학 상담 MCP에서 공식 입학처 선행학습영향평가 기준을 반영한 면접·구술 대비 포인트를 조회합니다.",
+        "annotations": {
+            "title": "AI 진로진학 상담 MCP 선행학습영향평가 조회",
+            "readOnlyHint": True,
+            "destructiveHint": False,
+            "idempotentHint": True,
+            "openWorldHint": False,
+        },
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -109,7 +144,14 @@ TOOLS: List[Dict[str, Any]] = [
     },
     {
         "name": "generate_counselor_comment",
-        "description": "지원 적합도, 활동 근거, 면접 대비 요소를 종합해 상담자 코멘트 초안을 생성합니다.",
+        "description": "AI 진로진학 상담 MCP에서 지원 적합도, 활동 근거, 면접 대비 요소를 종합해 상담자 코멘트 초안을 생성합니다.",
+        "annotations": {
+            "title": "AI 진로진학 상담 MCP 상담자 코멘트 생성",
+            "readOnlyHint": True,
+            "destructiveHint": False,
+            "idempotentHint": True,
+            "openWorldHint": False,
+        },
         "inputSchema": {
             "type": "object",
             "properties": {

@@ -59,6 +59,19 @@ GET /health
 - `search_prior_learning_assessment`: 공식 선행학습영향평가 기반 면접 대비 기준 조회
 - `generate_counselor_comment`: 상담자 코멘트 초안 생성
 
+## PlayMCP 등록 점검
+
+각 Tool은 PlayMCP Agentic Player 10 등록 점검 기준에 맞춰 아래 항목을 포함합니다.
+
+- `description`에 서비스명 `AI 진로진학 상담 MCP` 포함
+- `annotations.title` 정의
+- `annotations.readOnlyHint` 정의
+- `annotations.destructiveHint` 정의
+- `annotations.idempotentHint` 정의
+- `annotations.openWorldHint` 정의
+
+이 서버는 공모전용 더미 데이터를 조회하고 텍스트 보고서 초안을 생성하는 비파괴 도구입니다.
+
 ## Local Run
 
 ```bash
