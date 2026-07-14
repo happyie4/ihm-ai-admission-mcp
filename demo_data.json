@@ -1,0 +1,40 @@
+{
+  "students": [
+    {
+      "student_id": 1001,
+      "display_name": "사례학생 A",
+      "target_major": "경영학과",
+      "career_goal": "데이터 기반 경영기획자",
+      "converted_grade": 1.72,
+      "activities": ["경제 동아리 탐구", "수학 통계 프로젝트", "학생회 예산 분석"],
+      "next_action": "경영학 지원 동기와 수학·통계 활동의 연결성을 학생부와 면접 답변에서 강화합니다."
+    },
+    {
+      "student_id": 1002,
+      "display_name": "사례학생 B",
+      "target_major": "산업공학과",
+      "career_goal": "AI 제조공정 최적화 연구원",
+      "converted_grade": 2.08,
+      "activities": ["물리 실험 설계", "파이썬 데이터 분석", "공정 최적화 탐구"],
+      "next_action": "수학, 물리, 정보 과목의 학업 역량을 전공 적합성 근거로 정리합니다."
+    }
+  ],
+  "admission_cutlines": [
+    {
+      "university": "고려대학교",
+      "major": "경영학과",
+      "admission_type": "학교추천",
+      "cut_70_grade": 1.86,
+      "competition_rate": "8.4:1",
+      "source": "공모전 시연용 더미 입결 데이터"
+    },
+    {
+      "university": "고려대학교",
+      "major": "산업경영공학부",
+      "admission_type": "학교추천",
+      "cut_70_grade": 2.02,
+      "competition_rate": "7.1:1",
+      "source": "공모전 시연용 더미 입결 데이터"
+    }
+  ]
+}
