@@ -93,6 +93,20 @@ TOOLS: List[Dict[str, Any]] = [
             "additionalProperties": False,
         },
     },
+    {
+        "name": "search_prior_learning_assessment",
+        "description": "공식 입학처 선행학습영향평가 기준을 반영한 면접·구술 대비 포인트를 조회합니다.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "university": {"type": "string"},
+                "admission_type": {"type": "string"},
+                "year": {"type": "integer"},
+            },
+            "required": ["university"],
+            "additionalProperties": False,
+        },
+    },
 ]
 
 
@@ -117,6 +131,24 @@ def find_cutline(
         ):
             return cutline
     raise ValueError("해당 대학/학과/전형 입결 더미 데이터를 찾을 수 없습니다.")
+
+
+def find_prior_learning(
+    data: Dict[str, Any],
+    university: str,
+    admission_type: str = "",
+    year: int = 0,
+) -> List[Dict[str, Any]]:
+    results = []
+    for item in data.get("prior_learning_assessments", []):
+        if item["university"] != university:
+            continue
+        if admission_type and item["admission_type"] != admission_type:
+            continue
+        if year and int(item["year"]) != int(year):
+            continue
+        results.append(item)
+    return results
 
 
 def classify_fit(student_grade: float, cut_70_grade: float) -> Dict[str, str]:
@@ -184,6 +216,16 @@ def call_tool(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
             arguments["admission_type"],
         )
         fit = classify_fit(student["converted_grade"], cutline["cut_70_grade"])
+        prior_learning = find_prior_learning(
+            data,
+            cutline["university"],
+            cutline["admission_type"],
+            2026,
+        )
+        prior_learning_text = "등록된 선행학습영향평가 기준 없음"
+        if prior_learning:
+            points = prior_learning[0]["counseling_points"]
+            prior_learning_text = "\n".join(f"- {point}" for point in points)
         report = f"""# AI 진로진학 상담 보고서 초안
 
 ## 학생 개요
@@ -205,8 +247,12 @@ def call_tool(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
 - {student['next_action']}
 - 수능최저, 면접, 학생부 활동의 연결성을 함께 점검해야 합니다.
 
+## 선행학습영향평가 기반 면접 대비
+{prior_learning_text}
+
 ## 근거
 - {cutline['source']}
+- 선행학습영향평가 자료는 각 대학 공식 입학처 공개자료만 DB화하는 것을 원칙으로 합니다.
 
 ※ 본 보고서는 공모전 시연용 더미 데이터로 생성되었습니다.
 """
@@ -222,6 +268,30 @@ def call_tool(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
             "입학 후 1학년 때 보완하고 싶은 학업 역량은 무엇인가요?",
         ]
         return text_content("\n".join(f"{i + 1}. {q}" for i, q in enumerate(questions)))
+
+    if name == "search_prior_learning_assessment":
+        results = find_prior_learning(
+            data,
+            arguments["university"],
+            arguments.get("admission_type") or "",
+            int(arguments.get("year") or 0),
+        )
+        if not results:
+            return text_content("조건에 맞는 선행학습영향평가 시연 데이터가 없습니다.")
+
+        lines = []
+        for item in results:
+            lines.append(
+                f"## {item['year']} {item['university']} {item['admission_type']}"
+            )
+            lines.append(f"- 유형: {item['assessment_type']}")
+            lines.append(f"- 출처 원칙: {item['source_policy']}")
+            lines.append(f"- 상태: {item['official_source_status']}")
+            lines.append("- 상담 포인트")
+            lines.extend(f"  - {point}" for point in item["counseling_points"])
+            lines.append("- 예시 질문")
+            lines.extend(f"  {idx + 1}. {question}" for idx, question in enumerate(item["sample_questions"]))
+        return text_content("\n".join(lines))
 
     raise ValueError(f"지원하지 않는 도구입니다: {name}")
 
