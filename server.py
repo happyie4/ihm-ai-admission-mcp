@@ -17,6 +17,8 @@ from typing import Any, Dict, List
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_PATH = BASE_DIR / "demo_data.json"
+SERVICE_NAME = "IHM AI Admission Counseling (AI 진로진학 상담 MCP)"
+PROTOCOL_VERSION = "2025-03-26"
 
 
 def load_data() -> Dict[str, Any]:
@@ -40,10 +42,17 @@ def text_content(text: str) -> Dict[str, Any]:
     return {"content": [{"type": "text", "text": text}]}
 
 
+def tool_error_content(message: str) -> Dict[str, Any]:
+    return {
+        "content": [{"type": "text", "text": f"요청을 처리하지 못했습니다: {message}"}],
+        "isError": True,
+    }
+
+
 TOOLS: List[Dict[str, Any]] = [
     {
         "name": "list_demo_students",
-        "description": "AI 진로진학 상담 MCP에서 공모전용 더미 학생 목록을 조회합니다.",
+        "description": f"Lists demo students in {SERVICE_NAME}. 실제 학생 개인정보는 사용하지 않습니다.",
         "annotations": {
             "title": "AI 진로진학 상담 MCP 더미 학생 목록 조회",
             "readOnlyHint": True,
@@ -59,7 +68,7 @@ TOOLS: List[Dict[str, Any]] = [
     },
     {
         "name": "analyze_admission_fit",
-        "description": "AI 진로진학 상담 MCP에서 더미 학생의 내신과 대학 입결 70%컷을 비교해 지원 수준을 판단합니다.",
+        "description": f"Compares a demo student's grade with a 70% admission cutline in {SERVICE_NAME}.",
         "annotations": {
             "title": "AI 진로진학 상담 MCP 지원 적합도 분석",
             "readOnlyHint": True,
@@ -81,7 +90,7 @@ TOOLS: List[Dict[str, Any]] = [
     },
     {
         "name": "generate_admission_report",
-        "description": "AI 진로진학 상담 MCP에서 더미 학생 기준의 진로진학 상담 보고서 초안을 생성합니다.",
+        "description": f"Generates a concise counseling report for a demo student in {SERVICE_NAME}.",
         "annotations": {
             "title": "AI 진로진학 상담 MCP 상담 보고서 초안 생성",
             "readOnlyHint": True,
@@ -103,7 +112,7 @@ TOOLS: List[Dict[str, Any]] = [
     },
     {
         "name": "recommend_interview_questions",
-        "description": "AI 진로진학 상담 MCP에서 희망 전공과 학생 활동을 바탕으로 면접 예상 질문을 추천합니다.",
+        "description": f"Recommends interview questions from a demo student's activities and target major in {SERVICE_NAME}.",
         "annotations": {
             "title": "AI 진로진학 상담 MCP 면접 예상 질문 추천",
             "readOnlyHint": True,
@@ -123,7 +132,7 @@ TOOLS: List[Dict[str, Any]] = [
     },
     {
         "name": "search_prior_learning_assessment",
-        "description": "AI 진로진학 상담 MCP에서 공식 입학처 선행학습영향평가 기준을 반영한 면접·구술 대비 포인트를 조회합니다.",
+        "description": f"Finds interview preparation points based on prior-learning assessments in {SERVICE_NAME}.",
         "annotations": {
             "title": "AI 진로진학 상담 MCP 선행학습영향평가 조회",
             "readOnlyHint": True,
@@ -144,7 +153,7 @@ TOOLS: List[Dict[str, Any]] = [
     },
     {
         "name": "generate_counselor_comment",
-        "description": "AI 진로진학 상담 MCP에서 지원 적합도, 활동 근거, 면접 대비 요소를 종합해 상담자 코멘트 초안을 생성합니다.",
+        "description": f"Generates a counselor comment from admission fit and activities in {SERVICE_NAME}.",
         "annotations": {
             "title": "AI 진로진학 상담 MCP 상담자 코멘트 생성",
             "readOnlyHint": True,
@@ -166,7 +175,7 @@ TOOLS: List[Dict[str, Any]] = [
     },
     {
         "name": "get_admission_result_trend",
-        "description": "AI 진로진학 상담 MCP에서 대학·학과·전형의 최근 3년 입시결과 추세를 조회합니다.",
+        "description": f"Shows a three-year admission-result trend by university, major, and track in {SERVICE_NAME}.",
         "annotations": {
             "title": "AI 진로진학 상담 MCP 3년 입시결과 추세 조회",
             "readOnlyHint": True,
@@ -431,7 +440,7 @@ def call_tool(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
             "three_year_trend": trend_summary,
             "source": cutline["source"],
         }
-        return text_content(json.dumps(result, ensure_ascii=False, indent=2))
+        return text_content(json.dumps(result, ensure_ascii=False, separators=(",", ":")))
 
     if name == "generate_admission_report":
         student = find_student(data, int(arguments["student_id"]))
@@ -617,7 +626,7 @@ class MCPHandler(BaseHTTPRequestHandler):
 
         if method == "initialize":
             return jsonrpc_result(request_id, {
-                "protocolVersion": "2025-03-26",
+                "protocolVersion": PROTOCOL_VERSION,
                 "capabilities": {"tools": {}},
                 "serverInfo": {
                     "name": "ihm-ai-admission-mcp",
@@ -640,7 +649,7 @@ class MCPHandler(BaseHTTPRequestHandler):
             try:
                 return jsonrpc_result(request_id, call_tool(tool_name, arguments))
             except Exception as exc:
-                return jsonrpc_error(request_id, -32000, str(exc))
+                return jsonrpc_result(request_id, tool_error_content(str(exc)))
 
         if method == "ping":
             return jsonrpc_result(request_id, {})

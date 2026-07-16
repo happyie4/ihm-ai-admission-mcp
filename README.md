@@ -74,8 +74,19 @@ GET /health
 - `annotations.destructiveHint` 정의
 - `annotations.idempotentHint` 정의
 - `annotations.openWorldHint` 정의
+- 영문·국문 서비스명 `IHM AI Admission Counseling (AI 진로진학 상담 MCP)` 병기
+- Tool 오류는 정제된 text content와 `isError=true`로 반환
 
 이 서버는 공모전용 더미 데이터를 조회하고 텍스트 보고서 초안을 생성하는 비파괴 도구입니다.
+
+프로토콜 구현은 MCP 2025-03-26 Streamable HTTP 형식을 따르며 세션을 저장하지 않습니다.
+공식 MCP Inspector CLI로 `initialize`, `tools/list`, `tools/call`을 검사합니다.
+
+```bash
+python3 validate_playmcp_guide.py
+npx --yes @modelcontextprotocol/inspector --cli \
+  http://127.0.0.1:8000/mcp --transport http --method tools/list
+```
 
 ## Local Run
 

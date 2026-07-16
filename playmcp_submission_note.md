@@ -66,3 +66,12 @@ AI 진로진학 상담을 위한 MCP 서버입니다. 공모전 시연용 더미
 - 고려대학교 주요 모집단위 2025·2026 입결 시연 데이터 확대
 - 2024 입결 공식자료 확인 후 `자료준비중` 값을 실제 공식값으로 대체
 - `get_admission_result_trend`를 PlayMCP 재배포본에 반영
+
+## 2026-07-16 심사 의견 조치
+
+- 6개 심사 대상 Tool의 description 서비스명과 annotations는 커밋 `fabbe70`에 반영되어 있다.
+- 로컬 메타데이터 검증을 통과했다.
+- GitHub Actions 컨테이너 빌드도 성공했다.
+- 심사 의견은 KC의 이전 이미지 응답으로 판단한다.
+- 재심사 시 `ghcr.io/happyie4/ihm-ai-admission-mcp:sha-fabbe70`으로 KC 배포를 갱신한다.
+- 정보 불러오기 후 6개 Tool을 확인하고 재심사를 요청한다.
